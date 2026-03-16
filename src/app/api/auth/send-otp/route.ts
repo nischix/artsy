@@ -21,14 +21,14 @@ export async function POST(req: Request) {
         }
 
         await client.messages.create({
-            body: `Your Antigravity code: ${otp}`,
+            body: `Your Arty code: ${otp}`,
             from: process.env.TWILIO_PHONE_NUMBER,
             to: phone,
         });
 
         return NextResponse.json({ success: true });
-    } catch (error: any) {
+    } catch (error) {
         console.error('OTP Send Error:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: error instanceof Error ? error.message : "Unknown Error" }, { status: 500 });
     }
 }

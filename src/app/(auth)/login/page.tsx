@@ -34,7 +34,7 @@ export default function LoginPage() {
                     Welcome back
                 </Typography>
                 <Typography variant="body1" color="text.secondary" mb={4}>
-                    Sign in to your Antigravity account
+                    Sign in to your Arty account
                 </Typography>
 
                 {error && <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>{error}</Alert>}

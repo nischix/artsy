@@ -12,7 +12,7 @@ export async function POST(req: Request) {
 
         delete OTP_STORE[phone]; // clear after use
         return NextResponse.json({ success: true, phone });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error) {
+        return NextResponse.json({ error: error instanceof Error ? error.message : "Unknown Error" }, { status: 500 });
     }
 }

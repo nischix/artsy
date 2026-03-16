@@ -1,18 +1,39 @@
-import FeedGrid from '@/app/components/feed/FeedGrid';
-import { Box, Typography, Container } from '@mui/material';
+import HeroSection from "@/components/portfolio/HeroSection";
+import MottoSection from "@/components/portfolio/MottoSection";
+import CreatorStories from "@/components/portfolio/CreatorStories";
+import FeaturedCreators from "@/components/portfolio/FeaturedCreators";
+import TrendingAesthetics from "@/components/portfolio/TrendingAesthetics";
+import ExploreItems from "@/components/portfolio/ExploreItems";
+import AestheticShowcase from "@/components/portfolio/AestheticShowcase";
+import CommunityPosts from "@/components/portfolio/CommunityPosts";
+import MarketplacePreview from "@/components/portfolio/MarketplacePreview";
+import StatsSection from "@/components/portfolio/StatsSection";
+import CTASection from "@/components/portfolio/CTASection";
 
-export default function Home() {
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
+import { Box } from "@mui/material";
+
+export default function LandingPage() {
   return (
-    <Box component="main" sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-      <Box sx={{ pt: 8, pb: 4, textAlign: 'center' }}>
-        <Typography variant="h2" component="h1" fontWeight={800} sx={{ mb: 1, letterSpacing: '-0.02em' }}>
-          ANTIGRAVITY
-        </Typography>
-        <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 400 }}>
-          Curated Marketplace for the Modern Aesthetic
-        </Typography>
+    <Box sx={{ bgcolor: "background.default", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      <Navbar />
+      
+      <Box component="main" sx={{ flexGrow: 1 }}>
+        <HeroSection />
+        <MottoSection />
+        <CreatorStories />
+        <FeaturedCreators />
+        <TrendingAesthetics />
+        <ExploreItems />
+        <AestheticShowcase />
+        <CommunityPosts />
+        <MarketplacePreview />
+        <StatsSection />
+        <CTASection />
       </Box>
-      <FeedGrid />
+
+      <Footer />
     </Box>
   );
 }
