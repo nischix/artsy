@@ -2,10 +2,11 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { updateItemSchema } from '@/schemas/itemSchema';
 
-export async function GET(req: Request, { params }: { params: { itemId: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ itemId: string }> }) {
   try {
+    const { itemId } = await params;
     const item = await prisma.item.findUnique({
-      where: { id: params.itemId },
+      where: { id: itemId },
       include: {
         seller: {
           select: { username: true, avatarUrl: true, aesthetic: true }
@@ -23,13 +24,14 @@ export async function GET(req: Request, { params }: { params: { itemId: string }
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { itemId: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ itemId: string }> }) {
   try {
+    const { itemId } = await params;
     const body = await req.json();
     const validatedData = updateItemSchema.parse(body);
 
     const item = await prisma.item.update({
-      where: { id: params.itemId },
+      where: { id: itemId },
       data: validatedData,
     });
 
@@ -39,10 +41,11 @@ export async function PUT(req: Request, { params }: { params: { itemId: string }
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { itemId: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ itemId: string }> }) {
   try {
+    const { itemId } = await params;
     await prisma.item.delete({
-      where: { id: params.itemId },
+      where: { id: itemId },
     });
 
     return NextResponse.json({ message: 'Item deleted successfully' });

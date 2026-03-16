@@ -2,10 +2,11 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { profileUpdateSchema } from '@/schemas/userSchema';
 
-export async function GET(req: Request, { params }: { params: { username: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ username: string }> }) {
   try {
+    const { username } = await params;
     const user = await prisma.user.findUnique({
-      where: { username: params.username },
+      where: { username },
       select: {
         id: true,
         username: true,
@@ -28,13 +29,14 @@ export async function GET(req: Request, { params }: { params: { username: string
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { username: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ username: string }> }) {
   try {
+    const { username } = await params;
     const body = await req.json();
     const validatedData = profileUpdateSchema.parse(body);
 
     const user = await prisma.user.update({
-      where: { username: params.username },
+      where: { username },
       data: validatedData,
       select: {
          id: true,
