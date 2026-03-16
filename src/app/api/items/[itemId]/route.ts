@@ -1,24 +1,23 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { updateItemSchema } from '@/schemas/itemSchema';
 
 export async function GET(req: Request, { params }: { params: Promise<{ itemId: string }> }) {
   try {
     const { itemId } = await params;
-    const item = await prisma.item.findUnique({
+    const post = await prisma.post.findUnique({
       where: { id: itemId },
       include: {
-        seller: {
-          select: { username: true, avatarUrl: true, aesthetic: true }
+        creator: {
+          select: { username: true, avatar: true, aesthetic: true }
         }
       }
     });
 
-    if (!item) {
+    if (!post) {
       return NextResponse.json({ error: 'Item not found' }, { status: 404 });
     }
 
-    return NextResponse.json(item);
+    return NextResponse.json(post);
   } catch {
     return NextResponse.json({ error: 'Failed to fetch item' }, { status: 500 });
   }
@@ -28,14 +27,18 @@ export async function PUT(req: Request, { params }: { params: Promise<{ itemId: 
   try {
     const { itemId } = await params;
     const body = await req.json();
-    const validatedData = updateItemSchema.parse(body);
 
-    const item = await prisma.item.update({
+    const post = await prisma.post.update({
       where: { id: itemId },
-      data: validatedData,
+      data: {
+        title: body.title,
+        description: body.description,
+        price: body.price,
+        stock: body.stock,
+      },
     });
 
-    return NextResponse.json(item);
+    return NextResponse.json(post);
   } catch {
     return NextResponse.json({ error: 'Failed to update item' }, { status: 400 });
   }
@@ -44,7 +47,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ itemId: 
 export async function DELETE(req: Request, { params }: { params: Promise<{ itemId: string }> }) {
   try {
     const { itemId } = await params;
-    await prisma.item.delete({
+    await prisma.post.delete({
       where: { id: itemId },
     });
 

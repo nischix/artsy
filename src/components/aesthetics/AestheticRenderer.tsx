@@ -11,7 +11,7 @@ interface AestheticRendererProps {
 
 export default function AestheticRenderer({ aesthetic, children }: AestheticRendererProps) {
   const ThemeConfig = aestheticMap[aesthetic] || aestheticMap["noir"];
-  const ThemeComponent = ThemeConfig.ProfileLayout || (({ children }: any) => <>{children}</>);
+  const ThemeComponent = (ThemeConfig.ProfileLayout || (({ children }: { children: React.ReactNode }) => <>{children}</>)) as React.ComponentType<{ children: React.ReactNode }>;
   
   return (
     <ThemeProvider theme={ThemeConfig.theme}>

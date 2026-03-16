@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { profileUpdateSchema } from '@/schemas/userSchema';
 
 export async function GET(req: Request, { params }: { params: Promise<{ username: string }> }) {
   try {
@@ -10,12 +9,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ username
       select: {
         id: true,
         username: true,
+        name: true,
         bio: true,
-        avatarUrl: true,
+        avatar: true,
         aesthetic: true,
-        followersCount: true,
-        followingCount: true,
-        createdAt: true
+        isCreator: true,
+        createdAt: true,
       }
     });
 
@@ -33,17 +32,22 @@ export async function PUT(req: Request, { params }: { params: Promise<{ username
   try {
     const { username } = await params;
     const body = await req.json();
-    const validatedData = profileUpdateSchema.parse(body);
 
     const user = await prisma.user.update({
       where: { username },
-      data: validatedData,
+      data: {
+        bio: body.bio,
+        avatar: body.avatar,
+        aesthetic: body.aesthetic,
+        name: body.name,
+      },
       select: {
-         id: true,
-         username: true,
-         bio: true,
-         avatarUrl: true,
-         aesthetic: true
+        id: true,
+        username: true,
+        name: true,
+        bio: true,
+        avatar: true,
+        aesthetic: true,
       }
     });
 

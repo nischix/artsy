@@ -1,24 +1,22 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { createItemSchema } from '@/schemas/itemSchema';
 
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get('limit') || '20');
-    // const cursor = searchParams.get('cursor'); // Optional cursor pagination
-    
-    const items = await prisma.item.findMany({
+
+    const posts = await prisma.post.findMany({
       take: limit,
       orderBy: { createdAt: 'desc' },
       include: {
-        seller: {
-          select: { username: true, avatarUrl: true, aesthetic: true }
+        creator: {
+          select: { username: true, avatar: true, aesthetic: true }
         }
       }
     });
-    
-    return NextResponse.json(items);
+
+    return NextResponse.json(posts);
   } catch {
     return NextResponse.json({ error: 'Failed to fetch items' }, { status: 500 });
   }
@@ -27,19 +25,22 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const validatedData = createItemSchema.parse(body);
-    
-    // Hardcode sellerId for Phase 2, this would come from Auth session
-    const sellerId = body.sellerId || "default-uuid"; 
+    const creatorId = body.creatorId || body.sellerId || 'default-uuid';
 
-    const item = await prisma.item.create({
+    const post = await prisma.post.create({
       data: {
-        ...validatedData,
-        sellerId
+        title: body.title,
+        description: body.description,
+        aesthetic: body.aesthetic || 'minimal',
+        mediaUrls: body.mediaUrls || [],
+        mediaType: body.mediaType || 'image',
+        price: body.price,
+        stock: body.stock ?? 1,
+        creatorId,
       }
     });
 
-    return NextResponse.json(item, { status: 201 });
+    return NextResponse.json(post, { status: 201 });
   } catch {
     return NextResponse.json({ error: 'Failed to create item' }, { status: 400 });
   }
