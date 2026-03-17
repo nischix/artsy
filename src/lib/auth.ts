@@ -2,17 +2,7 @@ import { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
-
-// TEMPORARY mock users — replaced with real DB in Phase 10
-const MOCK_USERS = [
-    {
-        id: '1',
-        name: 'Test User',
-        email: 'test@test.com',
-        // hashed version of 'password123'
-        password: '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
-    },
-];
+import prisma from '@/lib/prisma';
 
 export const authOptions: NextAuthOptions = {
     secret: process.env.NEXTAUTH_SECRET,
@@ -28,11 +18,31 @@ export const authOptions: NextAuthOptions = {
                 password: { label: 'Password', type: 'password' },
             },
             async authorize(credentials) {
-                if (!credentials?.email || !credentials.password) return null;
-                const user = MOCK_USERS.find(u => u.email === credentials.email);
-                if (!user) return null;
-                const valid = await bcrypt.compare(credentials.password, user.password);
-                return valid ? { id: user.id, name: user.name, email: user.email } : null;
+                const email = credentials?.email?.trim().toLowerCase();
+                const password = credentials?.password;
+                if (!email || !password) return null;
+
+                const user = await prisma.user.findUnique({
+                    where: { email },
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        password: true,
+                        isCreator: true,
+                    },
+                });
+
+                if (!user?.password) return null;
+                const valid = await bcrypt.compare(password, user.password);
+                if (!valid) return null;
+
+                return {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email ?? email,
+                    isCreator: user.isCreator,
+                };
             },
         }),
     ],
@@ -42,9 +52,33 @@ export const authOptions: NextAuthOptions = {
         error: '/login',
     },
     callbacks: {
+        async jwt({ token, user }) {
+            if (user) {
+                token.id = user.id;
+                const maybeIsCreator = (user as { isCreator?: unknown }).isCreator;
+                if (typeof maybeIsCreator === 'boolean') {
+                    token.isCreator = maybeIsCreator;
+                    return token;
+                }
+            }
+
+            if ((!token.id || token.isCreator === undefined) && token.email) {
+                const dbUser = await prisma.user.findUnique({
+                    where: { email: String(token.email).trim().toLowerCase() },
+                    select: { id: true, isCreator: true },
+                });
+                if (dbUser) {
+                    token.id = dbUser.id;
+                    token.isCreator = dbUser.isCreator;
+                }
+            }
+
+            return token;
+        },
         async session({ session, token }) {
-            if (token.sub && session.user) {
-                (session.user as any).id = token.sub;
+            if (session.user) {
+                session.user.id = String(token.id ?? token.sub ?? '');
+                session.user.isCreator = Boolean(token.isCreator);
             }
             return session;
         },

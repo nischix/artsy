@@ -1,16 +1,22 @@
 'use client';
 
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { useEffect, useState } from 'react';
+import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Box, Button, TextField, Typography, Divider, Alert, Container, Paper } from '@mui/material';
+import { Box, Button, TextField, Typography, Divider, Alert, Paper } from '@mui/material';
 
 export default function LoginPage() {
     const router = useRouter();
+    const { data: session, status } = useSession();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (status !== 'authenticated' || !session?.user) return;
+        router.replace(session.user.isCreator ? '/dashboard' : '/explore');
+    }, [router, session, status]);
 
     const handleEmailLogin = async () => {
         setLoading(true);
@@ -20,7 +26,7 @@ export default function LoginPage() {
             setError('Invalid email or password');
             setLoading(false);
         } else {
-            router.push('/');
+            setLoading(false);
         }
     };
 
@@ -81,7 +87,7 @@ export default function LoginPage() {
                 <Button
                     fullWidth
                     variant="outlined"
-                    onClick={() => signIn('google', { callbackUrl: '/' })}
+                    onClick={() => signIn('google', { callbackUrl: '/login' })}
                     sx={{
                         borderRadius: 2,
                         py: 1.5,

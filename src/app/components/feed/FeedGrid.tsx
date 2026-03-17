@@ -20,7 +20,7 @@ export default function FeedGrid() {
         <Container maxWidth="lg" sx={{ py: 4 }}>
             <Grid container spacing={3}>
                 {items.map((item) => (
-                    <Grid key={item.id} {...({ xs: 6, sm: 4, md: 3 } as any)}>
+                    <Grid key={item.id} size={{ xs: 6, sm: 4, md: 3 }}>
                         <FeedCard item={item} />
                     </Grid>
                 ))}
